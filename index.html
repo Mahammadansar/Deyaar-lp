@@ -59,7 +59,7 @@
                                             <li><a class="menu-item" href="#section-overview">Overview</a></li>
                                             <li><a class="menu-item" href="#section-projects">Projects</a>
                                             </li>
-                                            <li><a class="menu-item" href="#section-agents">Our Agents</a>
+                                            <li><a class="menu-item" href="#section-agents">Our Agent</a>
                                             </li>
                                             <li><a class="menu-item" href="#section-contact">Contact</a></li>
                                             <li><a class="menu-item" href="#faq">Faq</a></li>
@@ -170,14 +170,14 @@
                             <div class="subtitle wow fadeInUp" data-wow-delay=".2s">Featured Developer</div>
                             <h2 class="wow fadeInUp" data-wow-delay=".4s">Deyaar</h2>
                             <p class="wow fadeInUp" data-wow-delay=".6s">Founded in 2002, Deyaar Development PJSC is one
-                                of the UAE’s most respected real estate developers and service providers. Publicly
+                                of the UAE's most respected real estate developers and service providers. Publicly
                                 listed and headquartered in Dubai, Deyaar is recognized for delivering a wide array of
                                 projects—from residential towers and hotels to affordable housing communities and
                                 commercial buildings. </p>
-                            <p class="wow fadeInUp" data-wow-delay=".6s">Deyaar’s real estate portfolio is supported by
-                                services in property management, owners’ association management, facilities management,
-                                and hospitality. The developer’s vision is grounded in sustainability, investor trust,
-                                and elevating everyday living across Dubai’s emerging and established locations. </p>
+                            <p class="wow fadeInUp" data-wow-delay=".6s">Deyaar's real estate portfolio is supported by
+                                services in property management, owners' association management, facilities management,
+                                and hospitality. The developer's vision is grounded in sustainability, investor trust,
+                                and elevating everyday living across Dubai's emerging and established locations. </p>
                             <p class="wow fadeInUp" data-wow-delay=".6s">Its hallmark communities include Midtown in
                                 Dubai Production City, Bella Rose in Al Barsha South, and Regalia in Business Bay, each
                                 known for value, efficiency, and connectivity.</p>
@@ -212,8 +212,45 @@
                         <h2 class="wow fadeInUp" data-wow-delay=".2s">Exclusive Projects of Deyaar</h2>
                     </div>
                 </div>
-
-                <div class="row g-4">
+                <!-- Search and Filter Bar -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-2">
+                        <select id="propertyNameFilter" class="form-control">
+                            <option value="">All Properties</option>
+                            <option value="ELEVE by Deyaar">ELEVE by Deyaar</option>
+                            <option value="Rosalia Residences">Rosalia Residences</option>
+                            <option value="Mar Casa">Mar Casa</option>
+                            <option value="Tria by Deyaar">Tria by Deyaar</option>
+                            <option value="Regalia">Regalia</option>
+                            <option value="Jannat Midtown">Jannat Midtown</option>
+                            <option value="Park Five">Park Five</option>
+                            <option value="Talia Residences">Talia Residences</option>
+                            <option value="Amalia Residences">Amalia Residences</option>
+                            <option value="The Atria">The Atria</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select id="propertyTypeFilter" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="Apartment">Apartment</option>
+                            <option value="Residential">Residential</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <select id="bedroomFilter" class="form-control">
+                            <option value="">All Bedrooms</option>
+                            <option value="Studio">Studio</option>
+                            <option value="1">1 Bedroom</option>
+                            <option value="2">2 Bedroom</option>
+                            <option value="3">3 Bedroom</option>
+                            <option value="4">4+ Bedroom</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <button id="resetFilters" class="btn1 btn-secondary w-100">Reset</button>
+                    </div>
+                </div>
+                <div class="row g-4" id="propertiesGrid">
                     <div class="col-md-6">
                         <div class="hover overflow-hidden relative text-light text-center wow zoomIn"
                             data-wow-delay=".0s">
@@ -514,8 +551,92 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-12 text-center mt-3">
+                        <button id="showMoreBtn" class="btn-main btn-line" style="display:none;">Show More</button>
+                    </div>
+                </div>
             </div>
         </section>
+        <script>
+        // --- Property Filtering and Show More Logic ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const properties = Array.from(document.querySelectorAll('#propertiesGrid > div.col-md-6'));
+            const showMoreBtn = document.getElementById('showMoreBtn');
+            const nameFilter = document.getElementById('propertyNameFilter');
+            const typeFilter = document.getElementById('propertyTypeFilter');
+            const bedroomFilter = document.getElementById('bedroomFilter');
+            const resetBtn = document.getElementById('resetFilters');
+            let visibleCount = 6;
+            let filteredProperties = properties;
+
+            function getPropertyData(card) {
+                // Extracts text for filtering
+                const name = card.querySelector('h3')?.textContent.trim() || '';
+                const location = card.querySelector('span:not(.badge)')?.textContent.toLowerCase() || '';
+                const type = Array.from(card.querySelectorAll('.badge')).map(b => b.textContent.toLowerCase()).join(' ');
+                const bedrooms = type.match(/studio|1|2|3|4/gi) || [];
+                return { name, location, type, bedrooms };
+            }
+
+            function filterProperties() {
+                const nameVal = nameFilter.value;
+                const typeVal = typeFilter.value.toLowerCase();
+                const bedroomVal = bedroomFilter.value.toLowerCase();
+                filteredProperties = properties.filter(card => {
+                    const { name, location, type, bedrooms } = getPropertyData(card);
+                    let matches = true;
+                    if (nameVal && name !== nameVal) matches = false;
+                    if (typeVal && !type.includes(typeVal)) matches = false;
+                    if (bedroomVal) {
+                        if (bedroomVal === 'studio' && !type.includes('studio')) matches = false;
+                        else if (bedroomVal !== 'studio' && !type.includes(bedroomVal)) matches = false;
+                    }
+                    return matches;
+                });
+                showProperties();
+            }
+
+            function showProperties() {
+                properties.forEach(card => card.style.display = 'none');
+                filteredProperties.forEach((card, i) => {
+                    if (i < visibleCount) card.style.display = '';
+                    else card.style.display = 'none';
+                });
+                if (filteredProperties.length > visibleCount) {
+                    showMoreBtn.style.display = '';
+                } else {
+                    showMoreBtn.style.display = 'none';
+                }
+            }
+
+            nameFilter.addEventListener('change', function () {
+                visibleCount = 6;
+                filterProperties();
+            });
+            typeFilter.addEventListener('change', function () {
+                visibleCount = 6;
+                filterProperties();
+            });
+            bedroomFilter.addEventListener('change', function () {
+                visibleCount = 6;
+                filterProperties();
+            });
+            showMoreBtn.addEventListener('click', function () {
+                visibleCount += 6;
+                showProperties();
+            });
+            resetBtn.addEventListener('click', function () {
+                nameFilter.value = '';
+                typeFilter.value = '';
+                bedroomFilter.value = '';
+                visibleCount = 6;
+                filterProperties();
+            });
+            // Initial display
+            filterProperties();
+        });
+        </script>
 
 
 
@@ -593,7 +714,7 @@
 
                     <div class="col-md-8">
                         <div class="text-center">
-                            <img src="agentss/Deepanshu.png" class="w-40 circle" alt="deepanshu">
+                            <img src="agentss/Tamir.webp" class="w-40 circle" alt="deepanshu">
                             <div class="mt-3">
                                 <h4 class="mb-0">Tamir Abdelkarim</h4>
                                 <!-- <div class="fw-500 id-color">Client Manager</div> -->
@@ -964,11 +1085,11 @@
                     <!-- Left Column -->
                     <div class="col-lg-6 relative z-3">
                         <div class="pe-lg-4 py-5 my-5">
-                            <div class="subtitle wow fadeInUp" data-wow-delay=".2s">FAQ’s</div>
+                            <div class="subtitle wow fadeInUp" data-wow-delay=".2s">FAQ's</div>
                             <h2 class="wow fadeInUp" data-wow-delay=".3s">About Deyaar</h2>
 
                             <div class="mt-4 wow fadeInUp" data-wow-delay=".4s">
-                                <h5>Where are Deyaar’s key projects located?</h5>
+                                <h5>Where are Deyaar's key projects located?</h5>
                                 <p>
                                     Deyaar has developments in Business Bay, Al Barsha, Jumeirah Village Circle (JVC),
                                     Dubai Silicon Oasis, and Dubai Production City.
@@ -979,7 +1100,7 @@
                                 <h5>Is Deyaar a publicly listed company?</h5>
                                 <p>
                                     Yes, Deyaar is publicly listed on the Dubai Financial Market (DFM) and is one of the
-                                    UAE’s leading real estate players.
+                                    UAE's leading real estate players.
                                 </p>
                             </div>
 
@@ -1008,9 +1129,9 @@
                         <div class="ps-lg-4 py-5 my-5">
 
                             <div class="mt-4 wow fadeInUp" data-wow-delay=".4s">
-                                <h5>What is Deyaar’s most recognized project?</h5>
+                                <h5>What is Deyaar's most recognized project?</h5>
                                 <p>
-                                    Regalia in Business Bay is among Deyaar’s flagship developments, featuring smart
+                                    Regalia in Business Bay is among Deyaar's flagship developments, featuring smart
                                     home
                                     integration and wellness-inspired amenities.
                                 </p>
@@ -1019,7 +1140,7 @@
                             <div class="mt-4 wow fadeInUp" data-wow-delay=".5s">
                                 <h5>Are Deyaar properties good for rental income?</h5>
                                 <p>
-                                    Yes. Deyaar’s locations are in high-demand areas and offer competitive rental yields
+                                    Yes. Deyaar's locations are in high-demand areas and offer competitive rental yields
                                     and high occupancy.
                                 </p>
                             </div>
@@ -1357,6 +1478,16 @@
         .whatsappBtn,
         .callBtn {
             cursor: pointer;
+        }
+
+        .btn1 {
+            padding: 3px 25px 3px 25px;
+            color: #ffffff;
+            background-color: #0a0c0d;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            float: right;
         }
     </style>
 
