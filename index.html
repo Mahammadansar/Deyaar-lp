@@ -65,7 +65,7 @@
                                             <li><a class="menu-item" href="#section-agents">Our Agent</a>
                                             </li>
                                             <li><a class="menu-item" href="#section-contact">Contact</a></li>
-                                            <li><a class="menu-item" href="#faq">Faq</a></li>
+                                            <li><a class="menu-item" href="#faq">FAQs</a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -1562,8 +1562,8 @@
             // Open WhatsApp to selected agent
             const agentNumber = selectedAgentPhone || '+971585708097'; // fallback to company if not set
             const message = encodeURIComponent(`My name is ${userName} and I am interested in ${lead_type} ${purpose} properties. Contact me at ${phone}. Please connect me with ${selectedAgent}.`);
-            // Remove '+' from agentNumber if present
-            const waNumber = (selectedAgentPhone || '+971585708097').replace(/\D/g, '');
+            // Format agentNumber for wa.me (remove '+' and non-digits except leading country code)
+            const waNumber = agentNumber.replace(/^\+/, '').replace(/\D/g, '');
             window.open(`https://wa.me/${waNumber}?text=${message}`, '_blank');
         };
     </script>
